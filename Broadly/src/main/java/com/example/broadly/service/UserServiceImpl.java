@@ -2,9 +2,13 @@ package com.example.broadly.service;
 
 import com.example.broadly.dto.UserRequestDto;
 import com.example.broadly.dto.UserResponseDto;
+import com.example.broadly.entity.AppRole;
+import com.example.broadly.entity.Role;
 import com.example.broadly.entity.User;
+import com.example.broadly.repository.RoleRepositary;
 import com.example.broadly.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,6 +18,12 @@ public class UserServiceImpl implements UserService{
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private RoleRepositary roleRepositary;
 
     // ---------- MAPPER METHODS ----------
     //user created from the request will be sent as response to user
@@ -40,6 +50,9 @@ public class UserServiceImpl implements UserService{
     @Override
     public UserResponseDto createUser(UserRequestDto dto) {
         User user = mapToEntity(dto);
+        user.setPassword(this.passwordEncoder.encode(user.getPassword()));
+        Role role = roleRepositary.findByRoleName(AppRole.ROLE_USER).orElseThrow(()->new RuntimeException("Role Not Found"));
+        user.setRole(role);
         User savedUser = userRepository.save(user);
         return mapToResponse(savedUser);
     }
