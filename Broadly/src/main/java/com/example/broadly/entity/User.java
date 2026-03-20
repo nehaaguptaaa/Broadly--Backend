@@ -23,6 +23,8 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String name;
+
     @Column(nullable = false, unique = true)
     private String username;
 
@@ -33,6 +35,9 @@ public class User implements UserDetails {
     private String password;
 
     private String profileImage;
+
+    @Column(length = 200)
+    private String bio;
 
     @ManyToOne
     private Role role;
@@ -68,6 +73,9 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+    public String getActualUsername() {
+        return username;  // the 'username' column from database
     }
 }
 

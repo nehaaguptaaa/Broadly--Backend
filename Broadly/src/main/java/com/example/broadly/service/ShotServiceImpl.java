@@ -35,6 +35,8 @@ public class ShotServiceImpl implements ShotService {
         dto.setLink(shot.getLink());
         dto.setBoardId(shot.getBoard().getId());
         dto.setUserId(shot.getUser().getId());
+        dto.setUsername(shot.getUser().getActualUsername());
+        dto.setUserProfileImage(shot.getUser().getProfileImage());
         return dto;
     }
 

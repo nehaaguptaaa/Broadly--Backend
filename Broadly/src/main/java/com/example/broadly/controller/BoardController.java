@@ -60,7 +60,32 @@ public class BoardController {
         return "Board deleted successfully";
     }
 
-    //IMAGE UPLOAD ENDPOINT
+//    //IMAGE UPLOAD ENDPOINT
+//    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public BoardResponseDto createBoardWithImage(
+//            @RequestParam("name") String name,
+//            @RequestParam(value = "description", required = false) String description,
+//            @RequestParam("userId") Long userId,
+//            @RequestParam("coverImage") MultipartFile coverImage
+//    ) throws IOException {
+//
+//        // 1. Create uploads folder
+//        Files.createDirectories(Paths.get("uploads"));
+//
+//        // 2. Save image
+//        String fileName = System.currentTimeMillis() + "_" + coverImage.getOriginalFilename();
+//        Files.copy(coverImage.getInputStream(), Paths.get("uploads", fileName));
+//
+//        // 3. Prepare dto
+//        BoardRequestDto dto = new BoardRequestDto();
+//        dto.setName(name);
+//        dto.setDescription(description);
+//        dto.setCoverImage("/uploads/" + fileName);
+//        dto.setUserId(userId);
+//
+//        return boardService.createBoard(dto);
+//    }
+
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public BoardResponseDto createBoardWithImage(
             @RequestParam("name") String name,
@@ -68,23 +93,18 @@ public class BoardController {
             @RequestParam("userId") Long userId,
             @RequestParam("coverImage") MultipartFile coverImage
     ) throws IOException {
+        Files.createDirectories(Paths.get("uploads/boards"));
+        String ext = coverImage.getOriginalFilename().substring(coverImage.getOriginalFilename().lastIndexOf("."));
+        String fileName = System.currentTimeMillis() + "_" + java.util.UUID.randomUUID() + ext;
+        Files.copy(coverImage.getInputStream(), Paths.get("uploads/boards", fileName));
 
-        // 1. Create uploads folder
-        Files.createDirectories(Paths.get("uploads"));
-
-        // 2. Save image
-        String fileName = System.currentTimeMillis() + "_" + coverImage.getOriginalFilename();
-        Files.copy(coverImage.getInputStream(), Paths.get("uploads", fileName));
-
-        // 3. Prepare dto
         BoardRequestDto dto = new BoardRequestDto();
         dto.setName(name);
         dto.setDescription(description);
-        dto.setCoverImage("/uploads/" + fileName);
+        dto.setCoverImage("/uploads/boards/" + fileName);  // ← was /uploads/
         dto.setUserId(userId);
 
         return boardService.createBoard(dto);
     }
-
 }
 

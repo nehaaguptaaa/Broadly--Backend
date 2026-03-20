@@ -34,24 +34,52 @@ public class AuthController {
     private ModelMapper modelMapper;
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest){
-        String email = loginRequest.getEmail();
-        String password = loginRequest.getPassword();
-
-        Authentication authenticate = null;
-        try {
-            authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
-        }
-        catch (BadCredentialsException e) {
-            System.out.println("bad crenentials");
-        }
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
+        Authentication authenticate = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
+        );
         SecurityContextHolder.getContext().setAuthentication(authenticate);
-        User user = (User)authenticate.getPrincipal();
+        User user = (User) authenticate.getPrincipal();
         String token = jwtUtils.generateTokenFromUsername(user);
+
+        // Manually map — don't use ModelMapper here, it confuses UserDetails fields
+        UserRequestDto userDto = new UserRequestDto();
+        userDto.setId(user.getId());           // the actual database id
+        userDto.setUsername(user.getActualUsername()); // see note below
+        userDto.setName(user.getName());
+        userDto.setEmail(user.getEmail());
+        userDto.setBio(user.getBio());
+        userDto.setProfileImage(user.getProfileImage());
+        // DO NOT set password
+
         LoginResponse loginResponse = new LoginResponse();
         loginResponse.setToken(token);
-        UserRequestDto userDto = modelMapper.map(user, UserRequestDto.class);
         loginResponse.setUserDto(userDto);
-        return new ResponseEntity<LoginResponse>(loginResponse, HttpStatus.OK);
+        return new ResponseEntity<>(loginResponse, HttpStatus.OK);
     }
 }
+
+//    @PostMapping("/login")
+//    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest){
+//        String email = loginRequest.getEmail();
+//        String password = loginRequest.getPassword();
+//
+//        Authentication authenticate = null;
+//        try {
+//            authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
+//        }
+//        catch (BadCredentialsException e) {
+//            System.out.println("bad crenentials");
+//        }
+//        SecurityContextHolder.getContext().setAuthentication(authenticate);
+//        User user = (User)authenticate.getPrincipal();
+//        String token = jwtUtils.generateTokenFromUsername(user);
+//
+//
+//        LoginResponse loginResponse = new LoginResponse();
+//        loginResponse.setToken(token);
+//        UserRequestDto userDto = modelMapper.map(user, UserRequestDto.class);
+//        loginResponse.setUserDto(userDto);
+//        return new ResponseEntity<LoginResponse>(loginResponse, HttpStatus.OK);
+//    }
+//}

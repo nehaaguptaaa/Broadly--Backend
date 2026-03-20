@@ -18,6 +18,8 @@ public class Shot {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String username;
+
     private String title;
 
     private String description;
@@ -35,5 +37,10 @@ public class Shot {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    public String getActualUsername() {
+        return username;  // the 'username' column from database
+    }
+
 }
 
